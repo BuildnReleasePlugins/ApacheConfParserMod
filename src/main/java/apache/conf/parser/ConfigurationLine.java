@@ -97,7 +97,7 @@ public class ConfigurationLine {
 
     /**
      * 
-     * @return
+     * @return lineOfStart
      */
     public int getLineOfStart() {
         return lineOfStart;

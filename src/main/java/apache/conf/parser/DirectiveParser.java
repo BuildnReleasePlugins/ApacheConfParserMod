@@ -17,12 +17,12 @@ import apache.conf.modules.StaticModule;
 public class DirectiveParser extends Parser {
 
     /**
-     * @param rootConfFile
+     *  rootConfFile
      *            the Apache root configuration file.
-     * @param serverRoot
+     *  serverRoot
      *            the Apache server root
-     * @param staticModules
-     * @param sharedModules
+     *  staticModules
+     *  sharedModules
      * @throws Exception
      *             if the rootConfFile or serverRoot do not exist
      */
@@ -32,16 +32,15 @@ public class DirectiveParser extends Parser {
 
     /**
      * <p>
-     * Takes in a directive and puts it into parts<br/>
-     * <br/>
+     * Takes in a directive and puts it into parts
      * 
      * Example: "Listen 80 http" will be split into "Listen" "80" "http"
      * 
      * </p>
      * 
-     * @param line
+     *  line
      *            the line with parts to extract
-     * @return an array with the directive parts
+     *  an array with the directive parts
      */
     public static String[] extractDirectiveToParts(String line) {
         String strLine = line.replaceAll(Const.replaceCommaSpacesRegex, ",");
@@ -55,11 +54,11 @@ public class DirectiveParser extends Parser {
      * Parses all active configuration files for the directive specified by directiveType.
      * </p>
      * 
-     * @param directiveType
+     *  directiveType
      *            The directive name. This is not case sensitive.
-     * @param includeVHosts
+     *  includeVHosts
      *            flag to indicate whether to include directives inside VirtualHosts
-     * @return an array with all instances of the directive.
+     *  an array with all instances of the directive.
      * @throws Exception
      */
     public Directive[] getDirective(String directiveType, boolean includeVHosts) throws Exception {
@@ -111,11 +110,11 @@ public class DirectiveParser extends Parser {
      * The function will return an array with values "80" and "443 https".
      * </p>
      * 
-     * @param directiveType
+     *  directiveType
      *            The directive name. This is not case sensitive.
-     * @param includeVHosts
+     *  includeVHosts
      *            flag to indicate whether to include directives inside VirtualHosts
-     * @return gets all of the values of a directive in an array. If one instance of a directive has multiple values then they will be separated by spaces.
+     *  gets all of the values of a directive in an array. If one instance of a directive has multiple values then they will be separated by spaces.
      * @throws Exception
      */
     public String[] getDirectiveValue(String directiveType, boolean includeVHosts) throws Exception {
@@ -149,15 +148,15 @@ public class DirectiveParser extends Parser {
      * If you specify a directive type of "Listen" and a directive String of "Listen 127.0.0.1:80" then this directive String would be inserted after the first "Listen" directive in the configuration.
      * </p>
      * 
-     * @param directiveType
+     *  directiveType
      *            The directive name. This is not case sensitive.
-     * @param directiveString
+     *  directiveString
      *            The directive string to insert.
-     * @param before
+     *  before
      *            a boolean indicating whether the directiveString should be inserted before the first found directive. true for before, false for after.
-     * @param includeVHosts
+     *  includeVHosts
      *            flag to indicate whether to search for directives inside VirtualHosts
-     * @return a boolean indicating if the directive was found.
+     *  a boolean indicating if the directive was found.
      * @throws Exception
      */
     public boolean insertDirectiveBeforeOrAfterFirstFound(String directiveType, String directiveString, boolean before, boolean includeVHosts) throws Exception {
@@ -174,17 +173,17 @@ public class DirectiveParser extends Parser {
      * directive with a value containing the number "70" in the configuration eg. "Listen 70"
      * </p>
      * 
-     * @param directiveType
+     *  directiveType
      *            The directive name. This is not case sensitive.
-     * @param directiveString
+     *  directiveString
      *            The directive string to insert.
-     * @param matchesPattern
+     *  matchesPattern
      *            A filter that is used to check whether or not the directive matches a certain pattern.
-     * @param before
+     *  before
      *            a boolean indicating whether the directiveString should be inserted before or after the first found directive. true for before, false for after.
-     * @param includeVHosts
+     *  includeVHosts
      *            flag to indicate whether to search for directives inside VirtualHosts
-     * @return a boolean indicating if the directive was found.
+     *  a boolean indicating if the directive was found.
      *
      * @throws Exception
      */
@@ -243,13 +242,13 @@ public class DirectiveParser extends Parser {
     /**
      * Parses the Apache active file list looking for the first file with the directive and pattern combination.
      * 
-     * @param directiveType
+     *  directiveType
      *            The directive name. This is not case sensitive.
-     * @param matchesPattern
+     *  matchesPattern
      *            The pattern to match against the directive value.
-     * @param includeVHosts
+     *  includeVHosts
      *            flag to indicate whether to include directives in VirtualHosts
-     * @return the first file that matches the directive type and pattern combination or null if no file is found.
+     *  the first file that matches the directive type and pattern combination or null if no file is found.
      * @throws Exception
      */
     public String getDirectiveFile(String directiveType, Pattern matchesPattern, boolean includeVHosts) throws Exception {
@@ -275,17 +274,17 @@ public class DirectiveParser extends Parser {
     /**
      * Goes through the target file and removes any lines that match the directive type and pattern.
      * 
-     * @param directiveType
+     *  directiveType
      *            The directive name. This is not case sensitive.
-     * @param file
+     *  file
      *            The target file.
-     * @param matchesPattern
+     *  matchesPattern
      *            The pattern to match against the directive value.
-     * @param commentOut
+     *  commentOut
      *            a boolean indicating if the directive should be commented out rather than completely removed from the file. true to comment out, false to remove.
-     * @param includeVHosts
+     *  includeVHosts
      *            flag to indicate whether to search for directives inside VirtualHosts
-     * @return a boolean indicating if the directive was found.
+     *  a boolean indicating if the directive was found.
      *
      * @throws Exception
      */
@@ -329,17 +328,17 @@ public class DirectiveParser extends Parser {
     /**
      * Goes through the target file and replaces the value of any directives that match the directiveType and matchesPattern with the passed in insertValue.
      * 
-     * @param directiveType
+     *  directiveType
      *            The directive type. This is not case sensitive.
-     * @param file
+     *  file
      *            The target file.
-     * @param insertValue
+     *  insertValue
      *            The value to insert.
-     * @param matchesPattern
+     *  matchesPattern
      *            The pattern to match against the directive value.
-     * @param add
+     *  add
      *            Specifies whether we should add the directive to the file if it doesn't exist. true to add, false otherwise.
-     * @param includeVHosts
+     *  includeVHosts
      *            flag to indicate whether to search for directives inside VirtualHosts            
      * @throws Exception
      */
@@ -386,4 +385,108 @@ public class DirectiveParser extends Parser {
         }
 
     }
+    
+    //Added by boixmunl
+    public void setUniqueDirective(Parser parser, String file, String directiveType, String directiveValue) throws Exception{
+        Pattern pattern = Pattern.compile("");
+        discommentDirective(parser, file, directiveType);
+        Directive directives[] = getDirective(directiveType, true);
+        if(directives.length==1) {
+            setDirectiveInFile(directiveType, file, directiveValue, pattern, false, true);
+        }else if (directives.length==0){
+            throw new Exception("No "+directiveType+" has been found");
+        }else{
+            throw new Exception("More than one Directive called "+directiveType+" has been found");
+        }
+    }
+    
+    public void enableDirective(Parser parser, String file, String directiveType, String directiveValue) throws Exception{
+        //This method discomments a directive if it is comment or creates it if it doesnt exist
+        boolean exist=false;
+        Pattern pattern = Pattern.compile(directiveValue);
+        ParsableLine[] parsableLines=parser.getConfigurationParsableLines(true);
+        for(int i=0;i<parsableLines.length;i++){
+            if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains("#"+directiveType) && parsableLines[i].getConfigurationLine().isComment()){
+                //the directive is located commented
+                discommentDirective(parser, file, directiveType, directiveValue);
+                exist=true;
+            }else if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains(directiveType) && !parsableLines[i].getConfigurationLine().isComment()){
+                exist=true;
+            }
+        }
+        if(!exist){
+            setDirectiveInFile(directiveType, file, directiveValue, pattern, true, true);
+        }
+    }
+    
+    public void commentDirective(DirectiveParser dParser,Parser parser, String file, String directiveType, String directiveValue) throws Exception{
+        Pattern pattern = Pattern.compile(directiveValue);
+        ParsableLine[] parsableLines=parser.getConfigurationParsableLines(true);
+        for(int i=0;i<parsableLines.length;i++){
+            if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains(directiveType) && !parsableLines[i].getConfigurationLine().isComment()){
+                dParser.removeDirectiveFromFile(directiveType, file, pattern, true, true);
+            }
+        }
+    }
+    
+    public boolean getDirectiveStatus(Parser parser, DirectiveParser dParser, String file, String directiveType, String directiveValue) throws Exception{
+        boolean status=false;
+        ParsableLine[] parsableLines=parser.getFileParsableLines(file, true);
+        for(int i=0;i<parsableLines.length;i++){
+            if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains("#"+directiveType) && parsableLines[i].getConfigurationLine().isComment()){
+                //the directive is located commented
+                discommentDirective(parser, file, directiveType, directiveValue);
+                status=false;
+            }else if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains(directiveType) && !parsableLines[i].getConfigurationLine().isComment()){
+                //the directive is located uncommented
+                status=true;
+            }else{
+                //the directive is not located
+                status=false;
+            }
+        }
+        return status;
+    }
+    
+    private void discommentDirective(Parser parser, String file, String directiveType, String directiveValue) throws Exception{
+        boolean changed = false;
+        StringBuffer fileText = new StringBuffer();
+        ParsableLine[] parsableLines=parser.getFileParsableLines(file, true);
+        String strLine = "";
+        for(ParsableLine line : parsableLines){
+            strLine= line.getConfigurationLine().getLine();
+            if(line.getConfigurationLine().getLine().contains(directiveValue) && line.getConfigurationLine().getLine().contains("#"+directiveType) && line.getConfigurationLine().isComment()){
+                changed = true;
+                fileText.append(directiveType + " " + directiveValue);
+                fileText.append(Const.newLine);
+            }else{
+                fileText.append(strLine + Const.newLine);
+            }
+        }
+        if (changed) {
+            Utils.writeStringBufferToFile(new File(file), fileText, Charset.forName("UTF-8"));
+        }
+    }
+    
+    private void discommentDirective(Parser parser, String file, String directiveType) throws Exception {
+        //This method is only for directives who only have 1 entry with the same directiveType
+        boolean changed = false;
+        StringBuffer fileText = new StringBuffer();
+        ParsableLine[] parsableLines=parser.getFileParsableLines(file, true);
+        String strLine = "";
+        for(ParsableLine line : parsableLines){
+            strLine= line.getConfigurationLine().getLine();
+            if(line.getConfigurationLine().getLine().contains("#"+directiveType) && line.getConfigurationLine().isComment()){
+                changed = true;
+                fileText.append(strLine.split("#")[1]);
+                fileText.append(Const.newLine);
+            }else{
+                fileText.append(strLine + Const.newLine);
+            }
+        }
+        if (changed) {
+            Utils.writeStringBufferToFile(new File(file), fileText, Charset.forName("UTF-8"));
+        }
+    }
+    
 }

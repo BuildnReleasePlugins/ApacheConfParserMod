@@ -18,12 +18,12 @@ import java.util.regex.Pattern;
 public class EnclosureParser extends Parser {
 
     /**
-     * @param rootConfFile
+     *  rootConfFile
      *            the Apache root configuration file.
-     * @param serverRoot
+     *  serverRoot
      *            the Apache server root
-     * @param staticModules
-     * @param sharedModules
+     *  staticModules
+     *  sharedModules
      * @throws Exception
      *             if the rootConfFile or serverRoot do not exist
      */
@@ -33,16 +33,16 @@ public class EnclosureParser extends Parser {
 
     /**
      * <p>
-     * Takes in an enclosure and puts it into parts<br/>
-     * <br/>
+     * Takes in an enclosure and puts it into parts
+     * 
      * 
      * Example: "<VirtualHost *:80>" will be split into "VirtualHost" "80"
      * 
      * </p>
      * 
-     * @param line
+     *  line
      *            the line with parts to extract
-     * @return an array with the directive parts
+     *  an array with the directive parts
      */
     public static String[] extractEnclosureToParts(String line) {
         String strLine = line.replaceAll(">|<", "");
@@ -60,11 +60,11 @@ public class EnclosureParser extends Parser {
      * For example if you search for "VirtualHost" this function will return all VirtualHosts in the configuration.
      * </p>
      * 
-     * @param enclosureType
+     *  enclosureType
      *            The enclosure name. This is not case sensitive.
-     * @param includeVHosts
+     *  includeVHosts
      *            flag to indicate whether to include enclosures in VirtualHosts
-     * @return An array with all matching enclosures.
+     *  An array with all matching enclosures.
      * @throws Exception
      */
     public Enclosure[] getEnclosure(String enclosureType, boolean includeVHosts) throws Exception {
@@ -172,13 +172,13 @@ public class EnclosureParser extends Parser {
     /**
      * Removes all Enclosures from the active configuration that match the enclosure type and enclosure value pattern.
      * 
-     * @param enclosureType
+     *  enclosureType
      *            The enclosure name. This is not case sensitive.
-     * @param matchesValuePattern
+     *  matchesValuePattern
      *            The pattern to match the enclosure value against
-     * @param commentOut
+     *  commentOut
      *            true to comment out the matching enclosure, false to remove the enclosure
-     * @param includeVHosts
+     *  includeVHosts
      *            boolean indicating whether to search for enclosures inside virtual hosts
      * @throws Exception
      */
@@ -233,4 +233,60 @@ public class EnclosureParser extends Parser {
         }
     }
 
+    //Added by boixmunl
+    public void setUniqueEnclosureHeader(Parser parser, String file, String enclosureType, String enclosureValue) throws Exception{
+        Pattern pattern = Pattern.compile("");
+        Enclosure enclosures[] = getEnclosure(enclosureType, true);
+        if(enclosures.length==1) {
+            setEnclosureInFile(enclosureType, file, enclosureValue, pattern, false, true);
+        }else if (enclosures.length==0){
+            throw new Exception("No "+enclosureType+" has been found");
+        }else{
+            throw new Exception("More than one Enclosure called "+enclosureType+" has been found");
+        }
+    }
+    
+    public void setEnclosureHeader(Parser parser, String file, String enclosureType, String enclosureNewValue, String enclosureOldValue) throws Exception{
+        Pattern pattern = Pattern.compile(enclosureOldValue);
+        setEnclosureInFile(enclosureType, file, enclosureNewValue, pattern, false,true);
+    }
+    
+    public void setEnclosureInFile(String enclosureType, String file, String insertValue, Pattern matchesPattern, boolean add, boolean includeVHosts) throws Exception {
+
+        StringBuffer fileText = new StringBuffer();
+
+        boolean changed = false;
+
+        ParsableLine lines[] = getFileParsableLines(file, includeVHosts);
+
+        String strLine = "", cmpLine = "";
+        for (ParsableLine line : lines) {
+            strLine = line.getConfigurationLine().getLine();
+            cmpLine = line.getConfigurationLine().getProcessedLine();
+            if (line.getConfigurationLine().getLine().contains("<"+enclosureType) && cmpLine.contains(matchesPattern.toString())) {
+                if (matchesPattern.matcher(cmpLine).find()) {
+                    changed = true;
+                    fileText.append("<"+enclosureType + " " + insertValue+">");
+                    fileText.append(Const.newLine);
+                } else {
+                    fileText.append(strLine + Const.newLine);
+                }
+            } else {
+                fileText.append(strLine + Const.newLine);
+            }
+        }
+
+        if (!changed && add) {
+
+            changed = true;
+
+            fileText.append(Const.newLine);
+            fileText.append(enclosureType + " " + insertValue);
+            fileText.append(Const.newLine);
+        }
+
+        if (changed) {
+            Utils.writeStringBufferToFile(new File(file), fileText, Charset.forName("UTF-8"));
+        }
+    }
 }
