@@ -130,5 +130,12 @@ public class ConfigurationLine {
     public boolean isMultiLine() {
         return (lineOfStart != lineOfEnd);
     }
+ 
+    //Added by boixmunl
     
+    /*public Directive getDirectiveParser(){
+        DirectiveParser dParser;
+        
+        return dParser;
+    }*/
 }

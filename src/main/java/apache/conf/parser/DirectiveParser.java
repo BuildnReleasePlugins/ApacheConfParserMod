@@ -288,8 +288,8 @@ public class DirectiveParser extends Parser {
      *
      * @throws Exception
      */
-    public boolean removeDirectiveFromFile(String directiveType, String file, Pattern matchesPattern, boolean commentOut, boolean includeVHosts) throws Exception {
-
+    public boolean removeDirectiveFromFile(String directiveType, Pattern matchesPattern, boolean commentOut, boolean includeVHosts) throws Exception {
+        String file=rootConfFile;
         StringBuffer fileText = new StringBuffer();
 
         boolean changed = false;
@@ -342,8 +342,8 @@ public class DirectiveParser extends Parser {
      *            flag to indicate whether to search for directives inside VirtualHosts            
      * @throws Exception
      */
-    public void setDirectiveInFile(String directiveType, String file, String insertValue, Pattern matchesPattern, boolean add, boolean includeVHosts) throws Exception {
-
+    public void setDirectiveInFile(String directiveType, String insertValue, Pattern matchesPattern, boolean add, boolean includeVHosts) throws Exception {
+        String file=rootConfFile;
         StringBuffer fileText = new StringBuffer();
 
         boolean changed = false;
@@ -387,12 +387,13 @@ public class DirectiveParser extends Parser {
     }
     
     //Added by boixmunl
-    public void setUniqueDirective(Parser parser, String file, String directiveType, String directiveValue) throws Exception{
+    public void setUniqueDirective(String directiveType, String directiveValue) throws Exception{
+        String file=rootConfFile;
         Pattern pattern = Pattern.compile("");
-        discommentDirective(parser, file, directiveType);
+        discommentDirective(file, directiveType);
         Directive directives[] = getDirective(directiveType, true);
         if(directives.length==1) {
-            setDirectiveInFile(directiveType, file, directiveValue, pattern, false, true);
+            setDirectiveInFile(directiveType, directiveValue, pattern, false, true);
         }else if (directives.length==0){
             throw new Exception("No "+directiveType+" has been found");
         }else{
@@ -400,44 +401,47 @@ public class DirectiveParser extends Parser {
         }
     }
     
-    public void enableDirective(Parser parser, String file, String directiveType, String directiveValue) throws Exception{
+    public void enableDirective(String directiveType, String directiveValue) throws Exception{
         //This method discomments a directive if it is comment or creates it if it doesnt exist
+        String file=rootConfFile;
         boolean exist=false;
         Pattern pattern = Pattern.compile(directiveValue);
-        ParsableLine[] parsableLines=parser.getConfigurationParsableLines(true);
+        ParsableLine[] parsableLines=getConfigurationParsableLines(true);
         for(int i=0;i<parsableLines.length;i++){
             if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains("#"+directiveType) && parsableLines[i].getConfigurationLine().isComment()){
                 //the directive is located commented
-                discommentDirective(parser, file, directiveType, directiveValue);
+                discommentDirective(directiveType, directiveValue);
                 exist=true;
             }else if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains(directiveType) && !parsableLines[i].getConfigurationLine().isComment()){
                 exist=true;
             }
         }
         if(!exist){
-            setDirectiveInFile(directiveType, file, directiveValue, pattern, true, true);
+            setDirectiveInFile(directiveType, directiveValue, pattern, true, true);
         }
     }
     
-    public void commentDirective(DirectiveParser dParser,Parser parser, String file, String directiveType, String directiveValue) throws Exception{
+    public void commentDirective(String directiveType, String directiveValue) throws Exception{
+        String file=rootConfFile;
         Pattern pattern = Pattern.compile(directiveValue);
-        ParsableLine[] parsableLines=parser.getConfigurationParsableLines(true);
+        ParsableLine[] parsableLines=getConfigurationParsableLines(true);
         for(int i=0;i<parsableLines.length;i++){
             if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains(directiveType) && !parsableLines[i].getConfigurationLine().isComment()){
-                dParser.removeDirectiveFromFile(directiveType, file, pattern, true, true);
+                removeDirectiveFromFile(directiveType, pattern, true, true);
             }
         }
     }
     
-    public boolean getDirectiveStatus(Parser parser, DirectiveParser dParser, String file, String directiveType, String directiveValue) throws Exception{
+    public boolean getDirectiveStatus(String directiveType, String directiveValue) throws Exception{
+        String file=rootConfFile;
         boolean status=false;
-        ParsableLine[] parsableLines=parser.getFileParsableLines(file, true);
-        for(int i=0;i<parsableLines.length;i++){
-            if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains("#"+directiveType) && parsableLines[i].getConfigurationLine().isComment()){
+        ParsableLine[] parsableLines=getFileParsableLines(file, true);
+        for(ParsableLine line : parsableLines){
+            if(line.getConfigurationLine().getLine().contains(directiveValue) && line.getConfigurationLine().getLine().contains("#"+directiveType) && line.getConfigurationLine().isComment()){
                 //the directive is located commented
-                discommentDirective(parser, file, directiveType, directiveValue);
+                discommentDirective(directiveType, directiveValue);
                 status=false;
-            }else if(parsableLines[i].getConfigurationLine().getLine().contains(directiveValue) && parsableLines[i].getConfigurationLine().getLine().contains(directiveType) && !parsableLines[i].getConfigurationLine().isComment()){
+            }else if(line.getConfigurationLine().getLine().contains(directiveValue) && line.getConfigurationLine().getLine().contains(directiveType) && !line.getConfigurationLine().isComment()){
                 //the directive is located uncommented
                 status=true;
             }else{
@@ -448,10 +452,11 @@ public class DirectiveParser extends Parser {
         return status;
     }
     
-    private void discommentDirective(Parser parser, String file, String directiveType, String directiveValue) throws Exception{
+    private void discommentDirective(String directiveType, String directiveValue) throws Exception{
+        String file=rootConfFile;
         boolean changed = false;
         StringBuffer fileText = new StringBuffer();
-        ParsableLine[] parsableLines=parser.getFileParsableLines(file, true);
+        ParsableLine[] parsableLines=getFileParsableLines(file, true);
         String strLine = "";
         for(ParsableLine line : parsableLines){
             strLine= line.getConfigurationLine().getLine();
@@ -468,24 +473,96 @@ public class DirectiveParser extends Parser {
         }
     }
     
-    private void discommentDirective(Parser parser, String file, String directiveType) throws Exception {
-        //This method is only for directives who only have 1 entry with the same directiveType
-        boolean changed = false;
+    public boolean lineIsPresent(String line) throws Exception {
+        boolean result=false;
+        ParsableLine[] parsableLines=getConfigurationParsableLines(true);
+        for(int i=0;i<parsableLines.length;i++){
+            if(parsableLines[i].getConfigurationLine().getLine().equals(line)){
+                result=true;
+            }
+        }
+        return result;
+    }
+    
+    
+    //This method returns the directive value for the specific directive that has any directive value that matches to the directiveValueTrigger
+    public String getDirectiveValue(String directiveType,String directiveValueTrigger, boolean includeVHosts) throws Exception {
+        ArrayList<String> directiveValues = new ArrayList<String>();
+        Directive directives[] = getDirective(directiveType, includeVHosts);
+        boolean find = false;
+        String directiveValueList[];
+        String values;
+        String valueReturn=null;
+
+        for (Directive directive : directives) {
+            directiveValueList = directive.getValues();
+            values = "";
+            for (String directiveValue : directiveValueList) {
+                if (directiveValue.equals(directiveValueTrigger)){
+                    find=true;
+                }
+                values += directiveValue + " ";
+            }
+            if(find){
+                valueReturn=values;
+            }
+        }
+        if(!find){
+            throw new Exception("No "+directiveType+" has been found");
+        }
+        return valueReturn;
+    }
+
+    public void setDirectiveIntoEnclosure(String parentEnclosureType, String directiveType, String directiveString, Pattern ParentMatchesPattern, Pattern directiveMatchesPattern, boolean add, boolean includeVHosts) throws Exception {
+        String file=rootConfFile;
         StringBuffer fileText = new StringBuffer();
-        ParsableLine[] parsableLines=parser.getFileParsableLines(file, true);
-        String strLine = "";
-        for(ParsableLine line : parsableLines){
-            strLine= line.getConfigurationLine().getLine();
-            if(line.getConfigurationLine().getLine().contains("#"+directiveType) && line.getConfigurationLine().isComment()){
-                changed = true;
-                fileText.append(strLine.split("#")[1]);
-                fileText.append(Const.newLine);
-            }else{
+        int i=0;
+        boolean changed = false;
+
+        ParsableLine lines[] = getFileParsableLines(file, includeVHosts);
+        ParsableLine directiveLines[]=null;
+
+        String strLine = "", cmpLine = "";
+        for (i=0;i<lines.length;i++) {
+            strLine = lines[i].getConfigurationLine().getLine();
+            cmpLine = lines[i].getConfigurationLine().getProcessedLine();
+            if (lines[i].getConfigurationLine().getLine().contains("<"+parentEnclosureType) && cmpLine.contains(ParentMatchesPattern.toString())) {
+                if (ParentMatchesPattern.matcher(cmpLine).find()) {
+                    fileText.append(strLine + Const.newLine);
+                    i++;
+                    while(!lines[i].getConfigurationLine().getLine().contains("</"+parentEnclosureType+">")){
+                        strLine = lines[i].getConfigurationLine().getLine();
+                        cmpLine = lines[i].getConfigurationLine().getProcessedLine();
+                        if (!isCommentMatch(cmpLine) && isDirectiveMatch(cmpLine, directiveType) && lines[i].isInclude()) {
+                            if (directiveMatchesPattern.matcher(cmpLine).find()) {
+                                changed = true;
+                                fileText.append(directiveType + " " + directiveString);
+                                fileText.append(Const.newLine);
+                            } else {
+                                fileText.append(strLine + Const.newLine);
+                            }
+                        } else {
+                            fileText.append(strLine + Const.newLine);
+                        }
+                        i++;
+                    }
+                } else {
+                    fileText.append(strLine + Const.newLine);
+                }
+            } else {
                 fileText.append(strLine + Const.newLine);
             }
         }
+        if (!changed && add) {
+            changed = true;
+            fileText.append(Const.newLine);
+            fileText.append(directiveType + " " + directiveString);
+            fileText.append(Const.newLine);
+        }
         if (changed) {
             Utils.writeStringBufferToFile(new File(file), fileText, Charset.forName("UTF-8"));
+        }else{
+            //Parent enclosure not found.
         }
     }
     

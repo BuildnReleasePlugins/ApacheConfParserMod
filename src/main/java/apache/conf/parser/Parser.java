@@ -577,4 +577,19 @@ public class Parser {
         return files.toArray(new String[files.size()]);
     }
 
+    //Added by boixmunl
+    
+    
+    
+    public boolean checkIfCommentIsPresent(String comment) throws Exception{
+        boolean result=false;
+        Pattern pattern=Pattern.compile(comment);
+        ParsableLine[] parsableLines=getConfigurationParsableLines(true);
+        for(int i=0;i<parsableLines.length;i++){
+            if(pattern.matcher(parsableLines[i].getConfigurationLine().getLine()).find() && parsableLines[i].getConfigurationLine().isComment()){
+                result=true;
+            }
+        }
+        return result;
+    }
 }

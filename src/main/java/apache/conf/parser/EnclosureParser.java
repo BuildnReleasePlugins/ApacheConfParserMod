@@ -183,42 +183,29 @@ public class EnclosureParser extends Parser {
      * @throws Exception
      */
     public void deleteEnclosure(String enclosureType, Pattern matchesValuePattern, boolean commentOut, boolean includeVHosts) throws Exception {
-
         String includedFiles[] = getActiveConfFileList();
-
         boolean changed = false;
         StringBuffer fileText = new StringBuffer();
-
         ParsableLine lines[];
-
         for (String file : includedFiles) {
-
             fileText.delete(0, fileText.length());
-
             changed = false;
-
             lines = getFileParsableLines(file, includeVHosts);
-
             Stack enclosureStack = new Stack();
             String strLine = "", cmpLine = "";
             for (ParsableLine line : lines) {
                 strLine = line.getConfigurationLine().getLine();
                 cmpLine = line.getConfigurationLine().getProcessedLine();
-
                 if (!isCommentMatch(cmpLine) && isEnclosureTypeMatch(cmpLine, enclosureType) && line.isInclude()) {
-
                     if (matchesValuePattern.matcher(cmpLine).find()) {
-
                         enclosureStack.push(cmpLine);
                         changed = true;
                     }
                 }
-
                 if (!enclosureStack.isEmpty()) {
                     if (!isCommentMatch(cmpLine) && isCloseEnclosureTypeMatch(cmpLine, enclosureType)) {
                         enclosureStack.pop();
                     }
-
                     if (!cmpLine.startsWith("#") && commentOut) {
                         fileText.append("#" + strLine + Const.newLine);
                     }
@@ -226,7 +213,6 @@ public class EnclosureParser extends Parser {
                     fileText.append(strLine + Const.newLine);
                 }
             }
-
             if (changed) {
                 Utils.writeStringBufferToFile(new File(file), fileText, Charset.forName("UTF-8"));
             }
@@ -234,11 +220,12 @@ public class EnclosureParser extends Parser {
     }
 
     //Added by boixmunl
-    public void setUniqueEnclosureHeader(Parser parser, String file, String enclosureType, String enclosureValue) throws Exception{
+    public void setUniqueEnclosure(String enclosureType, String enclosureValue) throws Exception{
+        String file= rootConfFile;
         Pattern pattern = Pattern.compile("");
         Enclosure enclosures[] = getEnclosure(enclosureType, true);
         if(enclosures.length==1) {
-            setEnclosureInFile(enclosureType, file, enclosureValue, pattern, false, true);
+            setEnclosureInFile(enclosureType, enclosureValue, pattern, false, true);
         }else if (enclosures.length==0){
             throw new Exception("No "+enclosureType+" has been found");
         }else{
@@ -246,19 +233,11 @@ public class EnclosureParser extends Parser {
         }
     }
     
-    public void setEnclosureHeader(Parser parser, String file, String enclosureType, String enclosureNewValue, String enclosureOldValue) throws Exception{
-        Pattern pattern = Pattern.compile(enclosureOldValue);
-        setEnclosureInFile(enclosureType, file, enclosureNewValue, pattern, false,true);
-    }
-    
-    public void setEnclosureInFile(String enclosureType, String file, String insertValue, Pattern matchesPattern, boolean add, boolean includeVHosts) throws Exception {
-
+    public void setEnclosureInFile(String enclosureType, String insertValue, Pattern matchesPattern, boolean add, boolean includeVHosts) throws Exception {
+        String file= rootConfFile;
         StringBuffer fileText = new StringBuffer();
-
         boolean changed = false;
-
         ParsableLine lines[] = getFileParsableLines(file, includeVHosts);
-
         String strLine = "", cmpLine = "";
         for (ParsableLine line : lines) {
             strLine = line.getConfigurationLine().getLine();
@@ -275,18 +254,57 @@ public class EnclosureParser extends Parser {
                 fileText.append(strLine + Const.newLine);
             }
         }
-
         if (!changed && add) {
-
             changed = true;
-
             fileText.append(Const.newLine);
-            fileText.append(enclosureType + " " + insertValue);
+            fileText.append("<"+enclosureType + " " + insertValue+">");
+            fileText.append(Const.newLine);
+            fileText.append("</"+enclosureType+">");
             fileText.append(Const.newLine);
         }
-
         if (changed) {
             Utils.writeStringBufferToFile(new File(file), fileText, Charset.forName("UTF-8"));
         }
+    }
+    
+    public void insertEnclosureIntoEnclosure(String parentEnclosureType, String childEnclosureType, String enclosureString, Pattern ParentMatchesPattern, boolean includeVHosts) throws Exception {
+        String file=rootConfFile;
+        StringBuffer fileText = new StringBuffer();
+        boolean changed = false;
+        ParsableLine lines[] = getFileParsableLines(file, includeVHosts);
+        String strLine = "", cmpLine = "";
+        for (ParsableLine line : lines) {
+            strLine = line.getConfigurationLine().getLine();
+            cmpLine = line.getConfigurationLine().getProcessedLine();
+            if (line.getConfigurationLine().getLine().contains("<"+parentEnclosureType) && cmpLine.contains(ParentMatchesPattern.toString())) {
+                if (ParentMatchesPattern.matcher(cmpLine).find()) {
+                    changed = true;
+                    fileText.append(strLine + Const.newLine);
+                    fileText.append("     <"+childEnclosureType + " " + enclosureString+">");
+                    fileText.append(Const.newLine);
+                    fileText.append("     </"+childEnclosureType+">");
+                    fileText.append(Const.newLine);
+                } else {
+                    fileText.append(strLine + Const.newLine);
+                }
+            } else {
+                fileText.append(strLine + Const.newLine);
+            }
+        }
+        if (changed) {
+            Utils.writeStringBufferToFile(new File(file), fileText, Charset.forName("UTF-8"));
+        }else{
+            //Parent enclosure not found.
+        }
+    }
+
+    public boolean getEnclosureStatus(String enclosureType, String enclosureValue) throws Exception {
+        String file=rootConfFile;
+        boolean isPresent=false;
+        Enclosure enclosures[] = getEnclosure(enclosureType, true);
+        if(enclosures.length>=1) {
+            isPresent=true;
+        }   
+        return isPresent;
     }
 }
