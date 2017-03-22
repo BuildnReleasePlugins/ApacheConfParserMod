@@ -50,8 +50,9 @@ public class SharedModuleParser extends ModuleParser {
      * 
      */
     public SharedModule[] getSharedModules() throws Exception {
-        String output = runModuleCommand();
-
+        //String output = runModuleCommand();
+        String output ="";
+        
         ArrayList<SharedModule> modules = new ArrayList<SharedModule>();
 
         BufferedReader reader = new BufferedReader(new StringReader(output));

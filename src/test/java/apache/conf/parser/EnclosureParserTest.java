@@ -22,6 +22,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -59,6 +60,7 @@ public class EnclosureParserTest {
     /**
      * Test of extractEnclosureToParts method, of class EnclosureParser.
      */
+    @Ignore
     @Test
     public void testExtractEnclosureToParts() {
         System.out.println("extractEnclosureToParts");
@@ -73,6 +75,7 @@ public class EnclosureParserTest {
     /**
      * Test of getEnclosure method, of class EnclosureParser.
      */
+    @Ignore
     @Test
     public void testGetEnclosure() throws Exception {
         System.out.println("getEnclosure");
@@ -89,6 +92,7 @@ public class EnclosureParserTest {
     /**
      * Test of parseEnclosure method, of class EnclosureParser.
      */
+    @Ignore
     @Test
     public void testParseEnclosure() throws Exception {
         System.out.println("parseEnclosure");
@@ -107,15 +111,16 @@ public class EnclosureParserTest {
      */
     @Test
     public void testDeleteEnclosure() throws Exception {
+        EnclosureParser eParser = new EnclosureParser(rootConfFile, serverRoot, staticParser.getStaticModules(), sharedParser.getSharedModules());
         System.out.println("deleteEnclosure");
-        String enclosureType = "";
-        Pattern matchesValuePattern = null;
-        boolean commentOut = false;
-        boolean includeVHosts = false;
-        EnclosureParser instance = null;
-        instance.deleteEnclosure(enclosureType, matchesValuePattern, commentOut, includeVHosts);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        //
+        String enclosureType = "TestEnclosureDelete";
+        String enclosureValue = "Test Value";
+        eParser.setEnclosureInFile(enclosureType, enclosureValue, Pattern.compile(""), true, true);
+        assertTrue("setUniqueEnclosure Fails",eParser.getEnclosureStatus(enclosureType, enclosureValue));
+        Pattern matchesPattern = Pattern.compile(enclosureValue);
+        eParser.deleteEnclosure(enclosureType, matchesPattern, true, true);
+        assertFalse("setUniqueEnclosure Fails",eParser.getEnclosureStatus(enclosureType, enclosureValue));
     }
 
     /**
@@ -126,12 +131,13 @@ public class EnclosureParserTest {
         EnclosureParser eParser = new EnclosureParser(rootConfFile, serverRoot, staticParser.getStaticModules(), sharedParser.getSharedModules());
         System.out.println("setUniqueEnclosure Test starts");
         //
-        String enclosureType = "ServerRoot";
-        String enclosureValue = "\"c:/Apache24\"";
+        String enclosureType = "TestUniqueEnclosure";
+        String enclosureValue = "Test Value";
+        eParser.setEnclosureInFile(enclosureType, enclosureValue, Pattern.compile(""), true, true);
         assertTrue("setUniqueEnclosure Fails",eParser.getEnclosureStatus(enclosureType, enclosureValue));
         
-        enclosureType = "ServerRoot";
-        enclosureValue = "\"C:\\Program Files (x86)\\Apache Software Foundation\\Apache2.4\"";
+        enclosureType = "TestUniqueEnclosure";
+        enclosureValue = "prova";
         eParser.setUniqueEnclosure(enclosureType, enclosureValue);
         assertTrue("setUniqueEnclosure Fails",eParser.getEnclosureStatus(enclosureType, enclosureValue));
     }
@@ -142,15 +148,16 @@ public class EnclosureParserTest {
     @Test
     public void testSetEnclosureInFile() throws Exception {
         System.out.println("setEnclosureInFile");
-        String enclosureType = "";
-        String insertValue = "";
-        Pattern matchesPattern = null;
-        boolean add = false;
-        boolean includeVHosts = false;
-        EnclosureParser instance = null;
-        instance.setEnclosureInFile(enclosureType, insertValue, matchesPattern, add, includeVHosts);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String enclosureType = "TestEnclosureInFile";
+        String insertValue = "TestEnclosureValue";
+        Pattern matchesPattern = Pattern.compile("");
+        boolean add = true;
+        boolean includeVHosts = true;
+        EnclosureParser eParser = new EnclosureParser(rootConfFile, serverRoot, staticParser.getStaticModules(), sharedParser.getSharedModules());
+        //
+        String enclosureValue = "Test Value";
+        eParser.setEnclosureInFile(enclosureType, enclosureValue, matchesPattern, add, includeVHosts);
+        assertTrue("setUniqueEnclosure Fails",eParser.getEnclosureStatus(enclosureType, enclosureValue));
     }
 
     /**
@@ -158,16 +165,18 @@ public class EnclosureParserTest {
      */
     @Test
     public void testInsertEnclosureIntoEnclosure() throws Exception {
+                EnclosureParser eParser = new EnclosureParser(rootConfFile, serverRoot, staticParser.getStaticModules(), sharedParser.getSharedModules());
+
         System.out.println("insertEnclosureIntoEnclosure");
-        String parentEnclosureType = "";
-        String childEnclosureType = "";
-        String enclosureString = "";
-        Pattern ParentMatchesPattern = null;
-        boolean includeVHosts = false;
-        EnclosureParser instance = null;
-        instance.insertEnclosureIntoEnclosure(parentEnclosureType, childEnclosureType, enclosureString, ParentMatchesPattern, includeVHosts);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String enclosureType = "TestEnclosureIntoEnclosure";
+        String enclosureValue = "Test Value";
+        eParser.setEnclosureInFile(enclosureType, enclosureValue, Pattern.compile(""), true, true);
+        assertTrue("setUniqueEnclosure Fails",eParser.getEnclosureStatus(enclosureType, enclosureValue));
+        Pattern matchesPattern = Pattern.compile("Test Value");
+        String cildEnclosure = "TestEnclosure2";
+        String enclosureString = "prova";
+        eParser.insertEnclosureIntoEnclosure(enclosureType, cildEnclosure, enclosureString, matchesPattern, true);
+        assertTrue("setUniqueEnclosure Fails",eParser.getEnclosureStatus(cildEnclosure, enclosureString));
     }
 
     /**
@@ -175,15 +184,12 @@ public class EnclosureParserTest {
      */
     @Test
     public void testGetEnclosureStatus() throws Exception {
+        EnclosureParser eParser = new EnclosureParser(rootConfFile, serverRoot, staticParser.getStaticModules(), sharedParser.getSharedModules());
         System.out.println("getEnclosureStatus");
-        String enclosureType = "";
-        String enclosureValue = "";
-        EnclosureParser instance = null;
-        boolean expResult = false;
-        boolean result = instance.getEnclosureStatus(enclosureType, enclosureValue);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        String enclosureType = "TestEnclosureStatus";
+        String enclosureValue = "Test Value";
+        eParser.setEnclosureInFile(enclosureType, enclosureValue, Pattern.compile(""), true, true);
+        assertTrue("setUniqueEnclosure Fails",eParser.getEnclosureStatus(enclosureType, enclosureValue));
     }
     
 }

@@ -45,7 +45,8 @@ public class StaticModuleParser extends ModuleParser {
      */
     public StaticModule[] getStaticModules() throws Exception {
 
-        String output = runModuleCommand();
+        //String output = runModuleCommand();
+        String output ="";
 
         ArrayList<StaticModule> modules = new ArrayList<StaticModule>();
 
